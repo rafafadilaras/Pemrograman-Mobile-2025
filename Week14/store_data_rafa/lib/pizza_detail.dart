@@ -3,7 +3,14 @@ import '/model/pizza.dart';
 import 'httphelper.dart';
 
 class PizzaDetailScreen extends StatefulWidget {
-  const PizzaDetailScreen({super.key});
+  final Pizza pizza;
+  final bool isNew;
+  const PizzaDetailScreen({
+    super.key,
+    required this.pizza,
+    required this.isNew,
+  });
+
   @override
   State<PizzaDetailScreen> createState() => _PizzaDetailScreenState();
 }
@@ -14,12 +21,25 @@ class _PizzaDetailScreenState extends State<PizzaDetailScreen> {
   final TextEditingController txtDescription = TextEditingController();
   final TextEditingController txtPrice = TextEditingController();
   final TextEditingController txtImageUrl = TextEditingController();
+
   String operationResult = '';
+
+  @override
+  void initState() {
+    if (!widget.isNew) {
+      txtId.text = widget.pizza.id.toString();
+      txtName.text = widget.pizza.pizzaName;
+      txtDescription.text = widget.pizza.description;
+      txtPrice.text = widget.pizza.price.toString();
+      txtImageUrl.text = widget.pizza.imageUrl;
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pizza Detail Rafa')),
+      appBar: AppBar(title: Text(widget.isNew ? 'Add Pizza' : 'Edit Pizza')),
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: SingleChildScrollView(
@@ -36,6 +56,7 @@ class _PizzaDetailScreenState extends State<PizzaDetailScreen> {
               TextField(
                 controller: txtId,
                 decoration: const InputDecoration(hintText: 'Insert ID'),
+                readOnly: !widget.isNew,
               ),
               const SizedBox(height: 24),
               TextField(
@@ -63,9 +84,9 @@ class _PizzaDetailScreenState extends State<PizzaDetailScreen> {
               ),
               const SizedBox(height: 48),
               ElevatedButton(
-                child: const Text('Send Post'),
+                child: Text(widget.isNew ? 'Send Post' : 'Update Pizza'),
                 onPressed: () {
-                  postPizza();
+                  savePizza();
                 },
               ),
             ],
@@ -85,16 +106,20 @@ class _PizzaDetailScreenState extends State<PizzaDetailScreen> {
     super.dispose();
   }
 
-  Future postPizza() async {
+  Future savePizza() async {
     HttpHelper helper = HttpHelper();
     Pizza pizza = Pizza.fromJson({
-    'id': int.tryParse(txtId.text),
-    'pizzaName': txtName.text,
-    'description': txtDescription.text,
-    'price': double.tryParse(txtPrice.text),
-    'imageUrl': txtImageUrl.text,
+      'id': int.tryParse(txtId.text),
+      'pizzaName': txtName.text,
+      'description': txtDescription.text,
+      'price': double.tryParse(txtPrice.text),
+      'imageUrl': txtImageUrl.text,
     });
-    String result = await helper.postPizza(pizza);
+
+    final result = await (widget.isNew
+        ? helper.postPizza(pizza)
+        : helper.putPizza(pizza));
+
     setState(() {
       operationResult = result;
     });

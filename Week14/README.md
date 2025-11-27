@@ -261,3 +261,102 @@
 
       ![hasilPrak2](img/hasilPrak2.gif)
 
+## Praktikum 3 - Memperbarui Data di Web Service (PUT)
+
+### Langkah-langkah praktikum 
+
+- Langkah 1 - Masuk ke layanan Wiremock
+- Langkah 2 - Melengkapi permintaan
+- Langkah 3 - Save
+  
+  ![new Stub](img/putPizza.png)
+
+- Langkah 4 - Membuat method baru putPizza
+  ```dart
+  Future<String> putPizza(Pizza pizza) async {
+    const putPath = '/pizza';
+    String put = json.encode(pizza.toJson());
+    Uri url = Uri.https(authority, putPath);
+    http.Response r = await http.put(
+      url,
+      body: put,
+    );
+    return r.body;
+  }
+  ```
+- Langkah 5 - Menambahkan dua properti di PizzaDetailScreen
+  ```dart
+  final Pizza pizza;
+  final bool isNew;
+
+  const PizzaDetailScreen({
+    super.key,
+    required this.pizza,
+    required this.isNew,
+  });
+  ```
+- Langkah 6 - Override method initState()
+  ```dart
+  @override
+  void initState() {
+    if (!widget.isNew) {
+      txtId.text = widget.pizza.id.toString();
+      txtName.text = widget.pizza.pizzaName;
+      txtDescription.text = widget.pizza.description;
+      txtPrice.text = widget.pizza.price.toString();
+      txtImageUrl.text = widget.pizza.imageUrl;
+    }
+    super.initState();
+  }
+  ```
+- Langkah 7 - Edit method savePizza 
+  ```dart
+  Future savePizza() async {
+  ...
+      final result = await (widget.isNew
+    ? helper.postPizza(pizza)
+    : helper.putPizza(pizza));    
+    setState(() {
+        operationResult = result;
+      });
+    }
+  ```
+- Langkah 8 - Menambahkan properti onTap ke ListTile
+  ```dart
+  return ListTile(
+    title: Text(pizzas.data![position].pizzaName),
+    subtitle: Text(pizzas.data![position].description +
+                  ' - € ' +
+                  pizzas.data![position].price.toString()),
+    onTap: () {
+       Navigator.push(
+          context,
+          MaterialPageRoute(
+             builder: (context) => PizzaDetailScreen(
+                pizza: pizzas.data![position], isNew: false)),
+    );
+  ```
+- Langkah 9 - Meruskan Pizza baru dan true untuk parameter isNew ke rute PizzaDetail
+  ```dart
+    floatingActionButton: FloatingActionButton(
+            child: Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => PizzaDetailScreen(
+                          pizza: Pizza(),
+                          isNew: true,
+                        )),            
+            );
+        }),
+  );
+  ```
+- Langkah 10 - Run
+- Langkah 11 - Edit detail pizza 
+  - Soal 3
+    - Mengubah satu data dengan Nama dan NIM
+    - Capture hasil 
+
+      ![hasilPrak3](img/hasilPrak3.gif)
+
