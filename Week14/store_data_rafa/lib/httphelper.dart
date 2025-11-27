@@ -40,10 +40,14 @@ class HttpHelper {
     const putPath = '/pizza';
     String put = json.encode(pizza.toJson());
     Uri url = Uri.https(authority, putPath);
-    http.Response r = await http.put(
-      url, 
-      body: put,
-    );
+    http.Response r = await http.put(url, body: put);
+    return r.body;
+  }
+
+  Future<String> deletePizza(int id) async {
+    const deletePath = '/pizza';
+    Uri url = Uri.https(authority, deletePath);
+    http.Response r = await http.delete(url);
     return r.body;
   }
 }

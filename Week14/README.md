@@ -360,3 +360,43 @@
 
       ![hasilPrak3](img/hasilPrak3.gif)
 
+## Praktikum 4 - Menghapus Data dari Web Service (DELETE)
+
+### Langkah-langkah praktikum 
+
+- Langkah 1 - Masuk ke layanan Wiremock
+- Langkah 2 - Melengkapi permintaan
+- Langkah 3 - Save
+  
+  ![new Stub](img/deletePizza.png)
+  
+- Langkah 4 - Membuat method baru deletePizza
+  ```dart
+  Future<String> deletePizza(int id) async {
+    const deletePath = '/pizza';
+    Uri url = Uri.https(authority, deletePath);
+    http.Response r = await http.delete(
+      url,
+    );
+    return r.body;
+  }
+  ```
+- Langkah 5 - Refactor itemBuilder dari ListView.builder
+  ```dart
+  return ListView.builder(
+    itemCount: (pizzas.data == null) ? 0 : pizzas.data.length,
+    itemBuilder: (BuildContext context, int position) {
+        return Dismissible(
+                    key: Key(position.toString()),
+                    onDismissed: (item) {
+                      HttpHelper helper = HttpHelper();
+                      pizzas.data!.removeWhere(
+                          (element) => element.id == pizzas.data![position].id);
+                      helper.deletePizza(pizzas.data![position].id!);
+                    },
+  ```
+- Langkah 6 - Run
+  - Soal 4
+    - Capture hasil 
+
+      ![hasilPrak4](img/hasilPrak4.gif)

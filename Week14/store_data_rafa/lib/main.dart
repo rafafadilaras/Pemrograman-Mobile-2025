@@ -95,58 +95,77 @@ class _MyHomePageState extends State<MyHomePage> {
   // }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('JSON Rafa')),
-      body: FutureBuilder(
-        future: callPizzas(),
-        builder: (BuildContext context, AsyncSnapshot<List<Pizza>> Pizzas) {
-          if (Pizzas.hasError) {
-            return const Text('Something went wrong');
-          }
-          if (!Pizzas.hasData) {
-            return const CircularProgressIndicator();
-          }
-          return ListView.builder(
-            itemCount: (Pizzas.data == null) ? 0 : Pizzas.data!.length,
-            itemBuilder: (BuildContext context, int position) {
-              return ListTile(
-                title: Text(Pizzas.data![position].pizzaName),
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: const Text('JSON Rafa')),
+    body: FutureBuilder(
+      future: callPizzas(),
+      builder: (BuildContext context, AsyncSnapshot<List<Pizza>> pizzas) {
+        if (pizzas.hasError) {
+          return const Text('Something went wrong');
+        }
+        if (!pizzas.hasData) {
+          return const CircularProgressIndicator();
+        }
+        return ListView.builder(
+          itemCount: (pizzas.data == null) ? 0 : pizzas.data!.length,
+          itemBuilder: (BuildContext context, int position) {
+            return Dismissible(
+              key: Key(position.toString()),
+              onDismissed: (direction) {
+                HttpHelper helper = HttpHelper();
+                pizzas.data!.removeWhere(
+                  (element) => element.id == pizzas.data![position].id,
+                );
+                helper.deletePizza(pizzas.data![position].id!);
+              },
+              child: ListTile(
+                title: Text(pizzas.data![position].pizzaName),
                 subtitle: Text(
-                  Pizzas.data![position].description +
+                  pizzas.data![position].description +
                       ' - € ' +
-                      Pizzas.data![position].price.toString(),
+                      pizzas.data![position].price.toString(),
                 ),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => PizzaDetailScreen(
-                        pizza: Pizzas.data![position],
+                        pizza: pizzas.data![position],
                         isNew: false,
                       ),
                     ),
                   );
                 },
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  PizzaDetailScreen(pizza: Pizza(), isNew: true),
+              ),
+            );
+          },
+        );
+      },
+    ),
+    floatingActionButton: FloatingActionButton(
+      child: Icon(Icons.add),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PizzaDetailScreen(
+              pizza: Pizza.fromJson({
+                'id': 0,
+                'pizzaName': '',
+                'description': '',
+                'price': 0,
+                'imageUrl': '',
+              }),
+              isNew: true,
             ),
-          );
-        },
-      ),
-    );
-  }
+          ),
+        );
+      },
+    ),
+  );
+}
+
 
   // Future readJsonFile() async {
   //   String myString = await DefaultAssetBundle.of(context)
